@@ -101,8 +101,8 @@ public class Solution {
     }
 
     /**
-     * 以树状结构打印目标文件夹及其子文件夹下的所有文件名。
-     * @param path 待打印的目标文件夹。
+     * 以树状结构打印目标目录及其子目录下的所有文件名。
+     * @param path 待打印的目标目录。
      * @exception FileNotFoundException 如果 {@code path} 所指示的路径不存在。
      */
     public static void tree(String path) throws FileNotFoundException {
@@ -116,8 +116,8 @@ public class Solution {
     }
 
     /**
-     * 内部方法。用于递归访问目标文件夹及其子文件夹，并将其以树状结构打印出来。
-     * @param path 待打印的目标文件夹。
+     * 内部方法。用于递归访问目标目录及其子目录，并将其以树状结构打印出来。
+     * @param path 待打印的目标目录。
      * @param depth 递归的深度。调用 {@code tree(path)} 相当于调用 {@code __tree(path, 0)}。
      */
     private static void __tree(String path, int depth)
@@ -129,7 +129,7 @@ public class Solution {
                 // 本来想复刻软子的那个 tree 命令的格式的，结果因为懒（无奈）。
                 System.out.print("  ");
             }
-            // 顺便检测一下此项目是不是文件夹，如果是的话就递归一层。
+            // 顺便检测一下此项目是不是目录，如果是的话就递归一层。
             File tmp = new File(path+"\\"+item);
 
             System.out.printf("%s    %s%n", item, tmp.isDirectory() ? "<DIR>" : "<FILE>");
@@ -181,8 +181,7 @@ public class Solution {
             sb.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
         }
 
-        // 用增强 for 循环无法检测是否遍历到最后一个键值对。
-        // 只能用这样的丑办法作为输出格式的 workaround 。
+        // 用增强 for 循环无法检测是否遍历到最后一个键值对。只能用这样的丑办法作为输出格式的 workaround 。
         if(sb.length() > 2)
         {
             sb.delete(sb.length() - 2, sb.length());
@@ -192,24 +191,48 @@ public class Solution {
     }
 
     /**
+     * {@code copyFile} 和 {@code copyTextFile} 的先决条件，用于检查复制操作的可行性，并且返回指示源文件和目标文件的 {@code java.io.File} 对象数组。
+     * @param source 指示源文件的路径，此路径必须存在且不能是目录。
+     * @param destination 指示目标路径，在父目录不存在时会尝试创建。如果目标路径指示一个目录，则构造指示目标路径的 {@code java.io.File} 时，自动添加与 {@code source} 一致的文件名。
+     * @return {@code java.io.File} 类型的数组 {@code files}。其中 {@code files[0]} 指示源文件路径，{@code files[1]} 指示目标文件路径。
+     * @throws IOException 如果 {@code source} 指示的路径不存在，或者 {@code dest} 指示的路径不存在且无法被创建。
+     * @throws IllegalArgumentException 如果 {@code destination} 指示的路径和 {@code source} 相同时或仅指示到其父目录，或者指定的 {@code source} 是一个目录。
+     */
+    private static File[] __copyFileValidator(String source, String destination) throws IOException, IllegalArgumentException {
+        File src = new File(source);
+        File dest = new File(destination);
+        if (dest.isDirectory()) {
+            // 当 dest 仅仅指示文件夹时，将其添加一个文件名，用来避免一些马大哈（比如我）犯错。
+            dest = new File((destination + File.separator + src.getName()));
+        }
+        if(dest.getAbsolutePath().equals(src.getAbsolutePath())) {
+            throw new IllegalArgumentException("'" + src.getAbsolutePath() + "': Already exists. ");
+        }
+        if (!src.exists()) {
+            throw new IOException("'" + src.getAbsolutePath() + "': No such file or directory. ");
+        }
+        if (src.isDirectory()) {
+            throw new IllegalArgumentException("'" + src.getAbsolutePath() + "': Is a directory. ");
+        }
+        if (dest.getParentFile().mkdirs() && !dest.exists()) {
+            throw new IOException("'" + dest.getAbsolutePath() + "': Failed to create directory. ");
+        }
+        return new File[]{src, dest};
+    }
+
+    /**
      * 利用 {@code java.io.BufferedInputStream} 和 {@code java.io.BufferedOutputStream} 复制文件。
      * @param source 源文件的路径。
      * @param destination 目标文件的路径。
-     * @throws IOException 如果源文件不存在，或者目标文件路径的父路径不存在且创建受阻，或者复制过程异常终止。
+     * @throws IOException 如果复制过程异常终止。
      */
     public static void copyFile(String source, String destination) throws IOException {
-        File src = new File(source);
-        File dest = new File(destination);
+        // 使用经过 __copyFileValidator 检测并纠正的对象，其中 files[0] 指示 source， files[1] 指示 destination。
+        File[] files = __copyFileValidator(source, destination);
 
-        if (!src.exists()) {
-            throw new IOException("'" + source + "': No such file or directory. ");
-        }
-        if (dest.getParentFile().mkdirs() && !dest.exists()) {
-            throw new IOException("'" + destination + "': Failed to create directory. ");
-        }
         try (
-                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(src));
-                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dest))
+                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(files[0]));
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(files[1]))
         ){
             byte[] buf = new byte[1024];
             int len;
@@ -224,23 +247,17 @@ public class Solution {
 
     /**
      * 利用 {@code java.io.BufferedReader} 和 {@code java.io.BufferedWriter} 复制文本文件。
-     * @param source 源文件的路径。
-     * @param destination 目标文件的路径。
-     * @throws IOException 如果源文件不存在，或者目标文件路径的父路径不存在且创建受阻，或者复制过程异常终止。
+     * @param source 指示源文件的路径。
+     * @param destination 指示目标文件的路径。
+     * @throws IOException 如果复制过程异常终止。
      */
     public static void copyTextFile(String source, String destination) throws IOException {
-        File src = new File(source);
-        File dest = new File(destination);
+        // 使用经过 __copyFileValidator 检测并纠正的对象，其中 files[0] 指示 source， files[1] 指示 destination。
+        File[] files = __copyFileValidator(source, destination);
 
-        if (!src.exists()) {
-            throw new IOException("'" + source + "': No such file or directory. ");
-        }
-        if (dest.getParentFile().mkdirs() && !dest.exists()) {
-            throw new IOException("'" + destination + "': Failed to create directory. ");
-        }
         try (
-                BufferedReader br = new BufferedReader(new FileReader(src));
-                BufferedWriter bw = new BufferedWriter(new FileWriter(dest))
+                BufferedReader br = new BufferedReader(new FileReader(files[0]));
+                BufferedWriter bw = new BufferedWriter(new FileWriter(files[1]))
         ){
             String line;
             while ((line = br.readLine()) != null) {
