@@ -1,7 +1,6 @@
 package experiment;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -46,24 +45,24 @@ public class Test {
     }
 
     /**
-     * 给定若干日期，进行排序。
+     * 给定若干个日期，进行排序。
      * <p>方法定义在 {@link Solution#sort(Date[])} 。</p>
      */
     public static void runExperiment1_2(){
-        // 由于日期不便使用控制台输入，在此指定若干日期进行检测。
+        // 由于日期不便使用控制台输入，在此指定若干个日期进行检测。
         LocalDate[] localDates = {
-                LocalDate.of(2004, 7, 28),  // 武汉轨道交通1号线的开通时间。
-                LocalDate.of(2012, 12, 28), // 武汉轨道交通2号线的开通时间。
-                LocalDate.of(2015, 12, 28), // 武汉轨道交通3号线的开通时间。
-                LocalDate.of(2013, 12, 28), // 武汉轨道交通4号线的开通时间。
-                LocalDate.of(2021, 12, 26), // 武汉轨道交通5号线的开通时间。
-                LocalDate.of(2016, 12, 28), // 武汉轨道交通6号线的开通时间。
-                LocalDate.of(2018, 10, 1),  // 武汉轨道交通7号线的开通时间。
-                LocalDate.of(2017, 12, 26), // 武汉轨道交通8号线的开通时间。
-                LocalDate.of(2018, 10, 1),  // 武汉轨道交通11号线的开通时间。
-                LocalDate.of(2021, 12, 26), // 武汉轨道交通16号线的开通时间。
-                LocalDate.of(2023, 12, 20), // 武汉轨道交通19号线的开通时间。
-                LocalDate.of(2017, 12, 26)  // 武汉轨道交通阳逻线的开通时间。
+                LocalDate.of(2004, 7, 28),
+                LocalDate.of(2012, 12, 28),
+                LocalDate.of(2015, 12, 28),
+                LocalDate.of(2013, 12, 28),
+                LocalDate.of(2021, 12, 26),
+                LocalDate.of(2016, 12, 28),
+                LocalDate.of(2018, 10, 1),
+                LocalDate.of(2017, 12, 26),
+                LocalDate.of(2018, 10, 1),
+                LocalDate.of(2021, 12, 26),
+                LocalDate.of(2023, 12, 20),
+                LocalDate.of(2017, 12, 26)
         };
 
         // 借用 LocalDates 类对 Dates 类进行初始化，从而简化整个初始化过程。
@@ -71,8 +70,12 @@ public class Test {
         for(int i = 0; i < dates.length; i++) {
             dates[i] = Date.from(localDates[i].atStartOfDay(ZoneId.of("Asia/Shanghai")).toInstant());
         }
-
+        System.out.println("Before sorting: ");
+        for(Date i : dates){
+            System.out.printf("%tF%n", i);  // 格式化输出日期。%tF 指示 yyyy-MM-dd 的格式。
+        }
         Solution.sort(dates);   // 调用 Solution.sort 方法，对这些日期进行冒泡排序。
+        System.out.println("After sorting: ");
         for(Date i : dates){
             System.out.printf("%tF%n", i);  // 格式化输出日期。%tF 指示 yyyy-MM-dd 的格式。
         }
@@ -103,12 +106,9 @@ public class Test {
      * <p>用户不需要指定递归深度，对方法进行了封装，封装后的方法定义在 {@link Solution#tree(String)} 。</p>
      */
     public static void runExperiment1_4() {
-        String path;
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Enter a path to go: ");
-        path = sc.nextLine();
+        System.out.println("输出./test/exp1-4的目录结构如下：");
         try {
-            Solution.tree(path);
+            Solution.tree("./test/exp1-4");
         }
         catch (FileNotFoundException e) {
             System.err.println(e.getMessage());
@@ -116,18 +116,34 @@ public class Test {
 
     }
 
+    /**
+     * 遍历并输出数组中的元素。
+     * <p>方法返回了遍历后的字符串，定义在 {@link Solution#toString(Object[])} 。</p>
+     */
     public static void runExperiment1_5(){
         Integer[] n = new Integer[10];
         for(int i = 0; i < n.length; i++) {
-            n[i] = i;
+            n[i] = i;   // 初始化数组，自动打包。
         }
         System.out.println(Solution.toString(n));
     }
 
+    /**
+     * 遍历并输出 {@code java.util.List} 中的元素。
+     * <p>方法返回了遍历后的字符串，定义在 {@link Solution#toString(List)} 。</p>
+     */
     public static void runExperiment1_6(){
-
+        List<Integer> list = new ArrayList<>();
+        for(int i = 0; i < 10; i++) {
+            list.add(i);    // 初始化列表，自动打包。
+        }
+        System.out.println(Solution.toString(list));
     }
 
+    /**
+     * 遍历并输出 {@code java.util.Map} 中的键值对。
+     * <p>方法返回了遍历后的字符串，定义在 {@link Solution#toString(Map)} 。</p>
+     */
     public static void runExperiment1_7(){
         Map<Integer, String> map = new HashMap<>();
 
@@ -140,13 +156,75 @@ public class Test {
         System.out.println(Solution.toString(map));
     }
 
-    public static void runExperiment1_8() {
+    /**
+     * 分别使用字符流和字节流复制文件。
+     * <p>方法定义在 {@link Solution#copyTextFile(String, String)} 和 {@link Solution#copyFile(String, String)}</p>
+     */
+    public static void runExperiment1_8(){
+        System.out.println("使用字符流将 ./test/exp1-7/text-source-file 复制到 ./test/exp1-7/text-copied-file");
         try {
-            Solution.copyTextFile("./test/exp1_7/text_source.txt", "./test/exp1_7/text_destination.txt");
-            Solution.copyFile("./test/exp1_7/mp3_source.mp3", "./test/exp1_7/mp3_destination.mp3");
+            Solution.copyTextFile("./test/exp1-7/text-source-file", "./test/exp1-7/text-copied-file");
         }
-        catch (IOException e) {
-            System.err.println(e.getMessage());
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println("使用字节流将 ./test/exp1-7/mp3-source-file.mp3 复制到 ./test/exp1-7/mp3-copied-file.mp3");
+        try {
+            Solution.copyTextFile("./test/exp1-7/mp3-copied-file.mp3", "./test/exp1-7/mp3-copied-file.mp3");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * 分别使用字符流和字节流复制文件，并对可能出现的异常进行处理。
+     * <p>方法定义在 {@link Solution#copyTextFile(String, String)} 和 {@link Solution#copyFile(String, String)}</p>
+     */
+    public static void runExperiment1_8_full() {
+        System.out.println("由于此方法涉及的情况较为复杂，测试程序在此分类讨论。");
+
+        System.out.println("测试：当源路径指示一个文件夹而非文件时，将会报错。");
+        try {
+            Solution.copyTextFile("./test/exp1-7", "./test/exp1-7/is-a-directory.txt");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println("测试：当源路径和目标路径完全一致时，将会报错。");
+        try {
+            Solution.copyTextFile("./test/exp1-7/text-source-file", "./test/exp1-7/text-source-file");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println("测试：当源路径指示的文件不存在时，将会报错。");
+        try {
+            Solution.copyTextFile("./test/exp1-7/no-such-file-or-directory", "./test/exp1_7");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println("测试：当源路径和目标路径指示正确时，正常复制。");
+        try {
+            Solution.copyTextFile("./test/exp1-7/text-source-file", "./test/exp1-7/text-copied-file");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println("测试：当目标路径指示一个文件夹时，正常复制，复制文件的文件名与源文件相同。");
+        try {
+            Solution.copyTextFile("./test/exp1-7/text-source-file", "./test/exp1-7/destination");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        System.out.println("测试：使用字节流复制二进制文件，其实现与以上字符流类似，只展示正常情况");
+        try {
+            Solution.copyFile("./test/exp1-7/mp3-source-file.mp3", "./test/exp1-7/mp3-copied-file.mp3");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }
